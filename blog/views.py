@@ -73,7 +73,7 @@ def post_detail(request, slug):
 
     most_popular_tags = Tag.objects.popular()[:5].annotate(num_posts=Count('posts'))
 
-    most_popular_posts = Post.objects.popular()[:5].prefetch_related('author').fetch_with_comments_count()
+    most_popular_posts = Post.objects.popular()[:5].prefetch_related('author', 'tags').fetch_with_comments_count()
 
     context = {
         'post': serialized_post,
