@@ -1,10 +1,13 @@
 from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 
 
 class PostQuerySet(models.QuerySet):
+    def fetch_author_and_tags_witn_coomments_count(self):
+        return self.prefetch_related('author', 'tags').annotate(num_comments=Count('comments'))
+
 
     def year(self, year):
         posts_at_year = self.filter(published_at__year=year).order_by('published_at')
@@ -15,17 +18,14 @@ class PostQuerySet(models.QuerySet):
         return popular_posts
 
     def fetch_with_comments_count(self):
-        """Добавляет к объектам запроса количество комментариев
-
-        По сравнению с использованием двух annotate() в одном запросе,
-        экономит вычислительные ресурсы, так как не приходится перемножать
-        количество двух полей для каждого поста.
-        """
-
         return self.annotate(num_comments=Count('comments'))
 
 
 class TagQuerySet(models.QuerySet):
+    def fetch_count_posts(self):
+        queryset = Tag.objects.annotate(num_posts=Count('posts'))
+        return self.prefetch_related(Prefetch('posts', queryset=queryset))
+
 
     def popular(self):
         popular_tags = self.annotate(num_posts=Count('posts')).order_by('-num_posts')
