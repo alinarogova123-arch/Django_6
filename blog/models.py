@@ -8,7 +8,6 @@ class PostQuerySet(models.QuerySet):
     def fetch_author_and_tags_witn_coomments_count(self):
         return self.prefetch_related('author', 'tags').annotate(num_comments=Count('comments'))
 
-
     def year(self, year):
         posts_at_year = self.filter(published_at__year=year).order_by('published_at')
         return posts_at_year
@@ -20,12 +19,14 @@ class PostQuerySet(models.QuerySet):
     def fetch_with_comments_count(self):
         return self.annotate(num_comments=Count('comments'))
 
+    def fetch_author_and_likes_count(self):
+        return self.select_related('author').annotate(num_likes=Count('likes'))
+
 
 class TagQuerySet(models.QuerySet):
     def fetch_count_posts(self):
         queryset = Tag.objects.annotate(num_posts=Count('posts'))
         return self.prefetch_related(Prefetch('posts', queryset=queryset))
-
 
     def popular(self):
         popular_tags = self.annotate(num_posts=Count('posts')).order_by('-num_posts')
