@@ -5,7 +5,7 @@ from django.db.models import Count, Prefetch
 
 
 class PostQuerySet(models.QuerySet):
-    def fetch_author_and_tags_witn_coomments_count(self):
+    def fetch_author_and_tags_witn_comments_count(self):
         return self.prefetch_related('author', 'tags').annotate(num_comments=Count('comments'))
 
     def year(self, year):
